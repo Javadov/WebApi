@@ -39,7 +39,7 @@ controller.route('/:_tag/:take').get(async (req, res) => {
 
 
 // secured routes
-controller.route('/').post(async (req, res) => {
+controller.route('/').post(authorize, async (req, res) => {
     const {_tag, _imageName, _name, _category, _description, _rating, _price} = req.body
 
     if (!_name || !_price)
@@ -66,7 +66,21 @@ controller.route('/').post(async (req, res) => {
     }
 })
 
-controller.route('/:_id') .delete(authorize, async (req, res) => {
+controller.route('/product/:_id') .put(async (req, res) => {
+    const {_tag, _imageName, _name, _category, _description, _rating, _price} = req.body
+
+    const product = await productSchema.updateOne(
+        {_id: req.params._id},
+        {$set: req.body}
+    )
+
+    if (product)
+        res.status(201).json({text: `product with id ${req.params._id} is succesfully updated`})
+    else
+        res.status(400).json({text: 'something went wrong'})
+})
+
+controller.route('/product/:_id') .delete(async (req, res) => {
     if (!req.params._id)  
         res.status(400).json('no artcilenumber was specified')
     else  {
@@ -79,6 +93,7 @@ controller.route('/:_id') .delete(authorize, async (req, res) => {
         }
     }
 })
+
 
 
 module.exports = controller
